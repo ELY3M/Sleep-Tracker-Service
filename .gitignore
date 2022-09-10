@@ -1,4 +1,5 @@
 git.txt
+*.log
 *.iml
 .gradle
 /local.properties
