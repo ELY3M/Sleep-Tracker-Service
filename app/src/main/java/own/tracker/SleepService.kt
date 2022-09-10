@@ -7,11 +7,15 @@
 package own.tracker
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
@@ -26,6 +30,7 @@ class SleepService : Service(), SensorEventListener {
     private var mAccel = 0f
     private var mAccelCurrent = 0f
     private var mAccelLast = 0f
+
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -50,26 +55,29 @@ class SleepService : Service(), SensorEventListener {
         val delta = mAccelCurrent - mAccelLast
         mAccel = mAccel * 0.9f + delta // perform low-cut filter
         val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        val sleeptrack = preferences.getBoolean("sleeptrack", false)
+        val running = preferences.getBoolean("running", false)
         val sensitive = preferences.getString("phoneweight", "6.3")
         //Log.i("owntracker", "sensitive (phone weight): $sensitive")
         val sensitivef = sensitive!!.toFloat()
-        Log.i("owntracker", "mAccel: $mAccel")
+        //Log.i("owntracker", "mAccel: $mAccel")
         if (mAccel > sensitivef) {
-            if (sleeptrack) {
+            if (running) {
                 Log.i("owntracker", "SleepService: phone movement: " + mAccel.toString())
                 val editor = preferences.edit()
-                editor.putBoolean("sleeptrack", false)
+                editor.putBoolean("running", false)
                 editor.apply()
-                Log.i("owntracker", "SleepService: sleeptrack after phone moved: " + sleeptrack)
+                Log.i("owntracker", "SleepService: sleeptrack after phone moved: " + running)
                 Log.i("owntracker", "sleep tracking should stop")
                 MainActivity.timerStop()
+                MainActivity.running = false
             }
-        } else {
-            MainActivity.timerStart()
+        } /*else {
             val editor = preferences.edit()
-            editor.putBoolean("sleeptrack", true)
+            editor.putBoolean("running", true)
             editor.apply()
-        }
+            MainActivity.timerStart()
+            MainActivity.running = true
+        }*/
     }
+
 }

@@ -15,42 +15,54 @@
     android:layout_centerHorizontal="true"
     android:textSize="56sp" />
 
+
     <Button
-    android:id="@+id/reset_button"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerHorizontal="true"
-    android:layout_marginTop="130dp"
-    android:text="Reset" />
-
-
-
-
-    <Switch
         android:id="@+id/sleepservice"
-        android:key="sleepservice"
-        android:title="@string/sleepservice"
-        android:layout_marginTop="500dp"
+        android:layout_marginTop="150dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
 
 
+    <Button
+        android:id="@+id/reset_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="250dp"
+        android:text="Reset" />
+
+
     <TextView
         android:text="@string/phoneweight"
-        android:layout_marginTop="550dp"
+        android:layout_marginTop="350dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
 
     <Spinner
         android:id="@+id/phoneweight"
-        android:layout_marginTop="600dp"
+        android:layout_marginTop="400dp"
         android:layout_width="100sp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
 
 
+    <TextView
+        android:id="@+id/gps"
+        android:text="GPS: NA"
+        android:layout_marginTop="500dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/setgps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="600dp"
+        android:text="Set GPS" />
 
 
 </RelativeLayout>
