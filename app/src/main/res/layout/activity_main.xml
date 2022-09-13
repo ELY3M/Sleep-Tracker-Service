@@ -35,14 +35,14 @@
 
     <TextView
         android:text="@string/phoneweight"
-        android:layout_marginTop="350dp"
+        android:layout_marginTop="400dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
 
     <Spinner
         android:id="@+id/phoneweight"
-        android:layout_marginTop="400dp"
+        android:layout_marginTop="450dp"
         android:layout_width="100sp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
@@ -61,8 +61,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="600dp"
+        android:layout_marginTop="550dp"
         android:text="Set GPS" />
 
+    <Button
+        android:id="@+id/gpstrack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="600dp"
+        android:text="Enable GPS Tracking" />
 
 </RelativeLayout>

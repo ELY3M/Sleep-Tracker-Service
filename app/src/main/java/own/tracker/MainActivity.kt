@@ -14,6 +14,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.intentfilter.androidpermissions.PermissionManager
 import com.intentfilter.androidpermissions.models.DeniedPermissions
 import java.util.*
@@ -27,8 +28,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
     lateinit var sleepService: Intent
     lateinit var preferences: SharedPreferences
     lateinit var edit: SharedPreferences.Editor
-    lateinit var sleepServiceSwitch: Button
+    lateinit var start: Button
     lateinit var gps: TextView
+    var gpstrack: Boolean = false
 
     companion object {
         var lat = 0.0
@@ -37,20 +39,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         var lon_set: String? = "0.0"
         var seconds = 0
         var running = false
-
-        fun timerStart() {
-            running = true
-        }
-
-        fun timerStop() {
-            running = false
-        }
-
-        fun timerReset() {
-            running = false
-            seconds = 0
-        }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,14 +79,16 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         edit = preferences.edit()
-        val isRunning = preferences.getBoolean("running", false)
         sleepService = Intent(this, SleepService::class.java)
 
         lon_set = preferences.getString("lon_set", "0.0")
         lat_set = preferences.getString("lat_set", "0.0")
 
+        gpstrack = preferences.getBoolean("gpstrack", false)
+        Log.d("owntracker", "gpstrack " + gpstrack)
+
         if (savedInstanceState != null) {
-            seconds = savedInstanceState.getInt("seconds")
+            //seconds = savedInstanceState.getInt("seconds")
             running = savedInstanceState.getBoolean("running")
         }
         runTimer()
@@ -112,33 +102,35 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val gettime: String = java.lang.String.format(Locale.getDefault(), "%d:%02d:%02d", gethours, getminutes, getsecs)
         timeView.text = gettime
 
-        val reset = findViewById<View>(R.id.reset_button) as Button
-        reset.setOnClickListener {
-            timerReset()
-            seconds = 0
-            edit.putInt("time", 0)
-        }
-        val phoneweight = resources.getStringArray(R.array.weight)
-
-
-        sleepServiceSwitch = findViewById<View>(R.id.sleepservice) as Button
-        sleepServiceSwitch.setOnClickListener {
+        start = findViewById<View>(R.id.sleepservice) as Button
+        start.setOnClickListener {
             if (running) {
-                timerStop()
                 running = false
                 edit.putBoolean("running", false)
                 edit.apply()
                 stopService(sleepService)
-                sleepServiceSwitch.text = "Start"
+                start.text = "Start"
             } else {
-                timerStart()
                 running = true
                 edit.putBoolean("running", true)
                 edit.apply()
                 startService(sleepService)
-                sleepServiceSwitch.text = "Stop"
+                start.text = "Stop"
             }
         }
+
+
+        val reset = findViewById<View>(R.id.reset_button) as Button
+        reset.setOnClickListener {
+            running = false
+            edit.putBoolean("running", false)
+            edit.apply()
+            seconds = 0
+            edit.putInt("time", 0)
+            edit.apply()
+        }
+        val phoneweight = resources.getStringArray(R.array.weight)
+
 
         val phoneWeight = findViewById<View>(R.id.phoneweight) as Spinner
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, phoneweight)
@@ -180,19 +172,33 @@ class MainActivity : AppCompatActivity(), LocationListener {
             edit.apply()
         }
 
+        //gps tracking
+        val gpstrackbutton = findViewById<View>(R.id.gpstrack) as Button
+        gpstrack = preferences.getBoolean("gpstrack", false)
+        Log.d("owntracker", "gpstrackbutton gpstrack " + gpstrack)
 
-        if (isRunning) {
-            timerStart()
-            startService(sleepService)
-            running = true
-            sleepServiceSwitch.text =  "Stop"
+        if (gpstrack) {
+            gpstrackbutton.text = "Disable GPS Tracking"
         } else {
-            timerStop()
-            stopService(sleepService)
-            running = false
-            sleepServiceSwitch.text =  "Start"
+            gpstrackbutton.text = "Enable GPS Tracking"
         }
 
+        gpstrackbutton.setOnClickListener {
+            if (!gpstrack) {
+                Log.d("owntracker", "gpstrackbuttonpressed gpstrack " + gpstrack)
+                edit.putBoolean("gpstrack", true)
+                edit.apply()
+                gpstrackbutton.text = "Disable GPS Tracking"
+                gpstrack = preferences.getBoolean("gpstrack", false)
+            } else {
+                Log.d("owntracker", "gpstrackbuttonpressed gpstrack " + gpstrack)
+                edit.putBoolean("gpstrack", false)
+                edit.apply()
+                gpstrackbutton.text = "Enable GPS Tracking"
+                gpstrack = preferences.getBoolean("gpstrack", false)
+            }
+
+        }
 
     }
 
@@ -200,12 +206,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onPause() {
         super.onPause()
         edit.putInt("time", seconds)
+        edit.apply()
         Log.i("owntracker","onPause()!!!  seconds: $seconds")
     }
 
     override fun onDestroy() {
         super.onDestroy()
         edit.putInt("time", seconds)
+        edit.apply()
         Log.i("owntracker","onDestory()!!!  seconds: $seconds")
     }
 
@@ -213,7 +221,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         savedInstanceState: Bundle
     ) {
         super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putInt("seconds", seconds)
+        ///savedInstanceState.putInt("seconds", seconds)
         savedInstanceState.putBoolean("running", running)
     }
 
@@ -224,7 +232,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         edit = preferences.edit()
         lon_set = preferences.getString("lon_set", "0.0")
         lat_set = preferences.getString("lat_set", "0.0")
-        sleepServiceSwitch = findViewById<View>(R.id.sleepservice) as Button
+        start = findViewById<View>(R.id.sleepservice) as Button
         Log.i("owntracker", "gpsCheck(): $lon $lat - Set GPS: $lon_set $lat_set")
         val results = FloatArray(1)
         Location.distanceBetween(lat_set!!.toDouble(), lon_set!!.toDouble(), lat, lon, results)
@@ -233,22 +241,20 @@ class MainActivity : AppCompatActivity(), LocationListener {
         if (dist > 1) {
             Log.i("owntracker", "Phone GPS Moved Too far!!!!! $dist")
             if (running) {
-                timerStop()
                 running = false
                 edit.putBoolean("running", false)
                 edit.apply()
                 stopService(sleepService)
-                sleepServiceSwitch.text = "Start"
+                start.text = "Start"
             }
         } else {
             Log.i("owntracker", "Phone sleeping/staying at set GPS: $dist")
             if (!running) {
-                timerStart()
                 running = true
                 edit.putBoolean("running", true)
                 edit.apply()
                 startService(sleepService)
-                sleepServiceSwitch.text = "Stop"
+                start.text = "Stop"
             }
         }
 
@@ -268,16 +274,16 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 val secs: Int = seconds % 60
                 var time: String = java.lang.String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, secs)
                 timeView.text = time
+                Log.i("owntracker", "time: $time")
                 edit.putInt("time", seconds)
+                edit.apply()
                 if (running) {
                     getLocation()
-                    sleepServiceSwitch.text = "Stop"
+                    start.text = "Stop"
                     seconds++
-                    edit.putInt("time", seconds)
                 } else {
                     getLocation()
-                    sleepServiceSwitch.text = "Start"
-                    edit.putInt("time", seconds)
+                    start.text = "Start"
                 }
 
                 handler.postDelayed(this, 1000)
@@ -295,9 +301,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
         if (mylocation != null) {
             lat = mylocation!!.latitude
             lon = mylocation!!.longitude
-            Log.d("owntracker", "Lat: " + lat)
-            Log.d("owntracker", "Lon: " + lon)
-            gpsCheck()
+            preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            gpstrack = preferences.getBoolean("gpstrack", false)
+            Log.d("owntracker", "getLocation: Lat: " + lat)
+            Log.d("owntracker", "getLocation: Lon: " + lon)
+            Log.d("owntracker", "getLocation: gpstrack " + gpstrack)
+            if (gpstrack) {
+                gpsCheck()
+            }
         } else {
             Log.d("owntracker", "mylocation is null :(")
         }

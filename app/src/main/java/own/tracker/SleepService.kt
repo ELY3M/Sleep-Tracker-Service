@@ -68,7 +68,6 @@ class SleepService : Service(), SensorEventListener {
                 editor.apply()
                 Log.i("owntracker", "SleepService: sleeptrack after phone moved: " + running)
                 Log.i("owntracker", "sleep tracking should stop")
-                MainActivity.timerStop()
                 MainActivity.running = false
             }
         } /*else {
