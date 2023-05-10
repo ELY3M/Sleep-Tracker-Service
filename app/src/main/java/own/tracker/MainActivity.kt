@@ -42,7 +42,6 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStreamWriter
-import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import kotlin.system.exitProcess
@@ -61,6 +60,7 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
     lateinit var timer: Chronometer
     lateinit var startbutton: Button
     lateinit var sleeplogtext: TextView
+    var started: Boolean = false
     var starttime: String = ""
     var endtime: String = ""
     val handler = Handler(Looper.getMainLooper())
@@ -88,7 +88,6 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
             endtime = getTime()
             val timer = findViewById<View>(R.id.timer) as Chronometer
             val getTimer = timer.text
-            ///val timestring = "$starttime $getTimer $endtime\n"
             val timestring = "$starttime to $endtime = $getTimer\n"
             Log.i("owntracker", timestring)
             writeLog(timestring)
@@ -159,8 +158,15 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
         val sdcard = Environment.getExternalStorageDirectory()
         val dir = File(sdcard.absolutePath + "/")
         val file = File(dir, "sleeplog.txt")
-        val inputStream: InputStream = file.inputStream()
-        val gettext = inputStream.bufferedReader().use { it.readText() }
+        var gettext = ""
+        try {
+            if (file.exists()) {
+                val inputStream: InputStream = file.inputStream()
+                gettext = inputStream.bufferedReader().use { it.readText() }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
         return gettext
     }
 
@@ -236,7 +242,6 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
                 endtime = getTime()
                 val timer = findViewById<View>(R.id.timer) as Chronometer
                 val getTimer = timer.text
-                ///val timestring = "$starttime $getTimer $endtime\n"
                 val timestring = "$starttime to $endtime = $getTimer\n"
                 Log.i("owntracker", timestring)
                 writeLog(timestring)
@@ -249,7 +254,14 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
                 edit.putBoolean("running", true)
                 edit.apply()
                 startbutton.text = "Stop"
-                starttime = getTime()
+                if (!started) {
+                    edit.putString("starttime", getTime())
+                    edit.apply()
+                    starttime = getTime()
+                    started = true
+                } else {
+                    starttime = preferences.getString("starttime", "00:00:00").toString()
+                }
 
             }
         }
@@ -257,22 +269,28 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
 
         val reset = findViewById<View>(R.id.reset_button) as Button
         reset.setOnClickListener {
+            if (running) {
+                running = false
+                edit.putBoolean("running", false)
+                edit.apply()
+                endtime = getTime()
+                val timer = findViewById<View>(R.id.timer) as Chronometer
+                val getTimer = timer.text
+                val timestring = "$starttime to $endtime = $getTimer\n"
+                Log.i("owntracker", timestring)
+                writeLog(timestring)
+            }
+            started = false
             stoppedtime = 0
             timer.setBase(SystemClock.elapsedRealtime())
             edit.putLong("stopped", stoppedtime)
             edit.apply()
             timer.stop()
-            running = false
-            edit.putBoolean("running", false)
-            edit.apply()
+            //running = false
+            //edit.putBoolean("running", false)
+            //edit.apply()
             startbutton.text = "Start"
-            endtime = getTime()
-            val timer = findViewById<View>(R.id.timer) as Chronometer
-            val getTimer = timer.text
-            ///val timestring = "$starttime $getTimer $endtime\n"
-            val timestring = "$starttime to $endtime = $getTimer\n"
-            Log.i("owntracker", timestring)
-            writeLog(timestring)
+
         }
 
         val phoneweight = resources.getStringArray(R.array.weight)
@@ -334,7 +352,6 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
             edit.putBoolean("running", true)
             edit.apply()
             startbutton.text = "Stop"
-            starttime = getTime()
         }
     }
 
@@ -377,7 +394,7 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
         override fun run() {
             val timer = findViewById<View>(R.id.timer) as Chronometer
             val getTimer = timer.text
-            Log.i("owntrackerwatch", "timer: $getTimer running: $running")
+            Log.i("owntracker", "timer: $getTimer running: $running")
             preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
             edit = preferences.edit()
             edit.putString("time", getTimer.toString())
