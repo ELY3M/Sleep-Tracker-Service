@@ -1,26 +1,25 @@
 /*
- * Copyright 2022 ELY M. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
+ * Copyright 2022 ELY M.
+ * Fuck copyright!!!!
  */
 
 package own.tracker
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import kotlin.math.sqrt
+
 
 @Suppress("DEPRECATION")
 class SleepService : Service(), SensorEventListener {
@@ -59,6 +58,7 @@ class SleepService : Service(), SensorEventListener {
         val sensitive = preferences.getString("phoneweight", "6.3")
         //Log.i("owntracker", "sensitive (phone weight): $sensitive")
         val sensitivef = sensitive!!.toFloat()
+        //Log.i("owntracker", "sensitivef (phone weight): $sensitivef")
         //Log.i("owntracker", "mAccel: $mAccel")
         if (mAccel > sensitivef) {
             if (running) {
@@ -67,8 +67,13 @@ class SleepService : Service(), SensorEventListener {
                 editor.putBoolean("running", false)
                 editor.apply()
                 Log.i("owntracker", "SleepService: sleeptrack after phone moved: " + running)
-                Log.i("owntracker", "sleep tracking should stop")
+                Log.i("owntracker", "SleepService: sleep tracking should stop")
                 MainActivity.running = false
+                val intent = Intent("timer")
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+
+
+
             }
         } /*else {
             val editor = preferences.edit()

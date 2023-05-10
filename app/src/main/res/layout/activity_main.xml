@@ -1,75 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+<RelativeLayout
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".MainActivity">
 
 
-    <TextView
-    android:id="@+id/time_view"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="50dp"
-    android:layout_centerHorizontal="true"
-    android:textSize="56sp" />
+    <Chronometer
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/aqua"
+        android:textSize="93sp" />
 
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"
+        android:layout_centerHorizontal="true">
 
     <Button
         android:id="@+id/sleepservice"
-        android:layout_marginTop="150dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true" />
+        android:layout_height="wrap_content" />
 
+<Space
+    android:id="@+id/buttonspace"
+    android:layout_width="30dp"
+    android:layout_height="10dp"
+    android:layout_toEndOf="@id/sleepservice" />
 
     <Button
         android:id="@+id/reset_button"
+        android:layout_toEndOf="@id/buttonspace"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="250dp"
         android:text="Reset" />
+    </RelativeLayout>
+
 
 
     <TextView
         android:text="@string/phoneweight"
-        android:layout_marginTop="400dp"
-        android:layout_width="wrap_content"
+        android:layout_marginTop="250dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
 
     <Spinner
         android:id="@+id/phoneweight"
-        android:layout_marginTop="450dp"
+        android:layout_marginTop="300dp"
         android:layout_width="100sp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
 
 
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="380dp"
+        android:layout_centerHorizontal="true">
+
+        <Button
+            android:id="@+id/refreshlog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Refresh Log" />
+
+        <Space
+            android:id="@+id/buttonspace2"
+            android:layout_width="30dp"
+            android:layout_height="10dp"
+            android:layout_toEndOf="@id/refreshlog" />
+
+        <Button
+            android:id="@+id/deletelog"
+            android:layout_toEndOf="@id/buttonspace2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete Log" />
+    </RelativeLayout>
+
+
+
+
     <TextView
-        android:id="@+id/gps"
-        android:text="GPS: NA"
-        android:layout_marginTop="500dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:id="@+id/setgps"
+        android:id="@+id/sleeplog"
+        android:layout_marginTop="450dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="550dp"
-        android:text="Set GPS" />
+        android:text="Sleep: 00:00 PM 00:00 Woke Up: 00:00 AM \nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck\nfuck" />
 
-    <Button
-        android:id="@+id/gpstrack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="600dp"
-        android:text="Enable GPS Tracking" />
+
 
 </RelativeLayout>
+</ScrollView>
