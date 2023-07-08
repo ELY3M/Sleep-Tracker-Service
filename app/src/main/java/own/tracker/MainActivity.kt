@@ -57,18 +57,19 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
     lateinit var sleepService: Intent
     lateinit var preferences: SharedPreferences
     lateinit var edit: SharedPreferences.Editor
-    lateinit var timer: Chronometer
+    //lateinit var timer: Chronometer
     lateinit var startbutton: Button
     lateinit var sleeplogtext: TextView
-    var started: Boolean = false
-    var starttime: String = ""
-    var endtime: String = ""
     val handler = Handler(Looper.getMainLooper())
 
     companion object {
+        lateinit var timer: Chronometer
         var running = false
+        var started: Boolean = false
         var stoppedtime: Long = 0
-
+        var starttime: String = ""
+        var endtime: String = ""
+        var getTimer = ""
     }
 
     var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -85,12 +86,7 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
             edit.putBoolean("running", false)
             edit.apply()
             startbutton.text = "Start"
-            endtime = getTime()
-            val timer = findViewById<View>(R.id.timer) as Chronometer
-            val getTimer = timer.text
-            val timestring = "$starttime to $endtime = $getTimer\n"
-            Log.i("owntracker", timestring)
-            writeLog(timestring)
+
         }
     }
 
@@ -153,6 +149,39 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
         return mytimestamp
 
     }
+
+    fun countTime(startTimeStr: String): String {
+        //get now date in GMT zone
+        val cal: Calendar = Calendar.getInstance()
+        val format = SimpleDateFormat("h:mm:ss a")
+
+
+        val nowDateTime = format.format(cal.getTime())
+        val startTime = format.parse(startTimeStr)
+        val now = format.parse(nowDateTime)
+
+        Log.d("owntracker", "startTimeStr: "+startTimeStr)
+        Log.d("owntracker", "nowDateTime: "+nowDateTime)
+        Log.d("owntracker", "startTime: "+startTime)
+        Log.d("owntracker", "now: "+now)
+
+        //in milliseconds
+        val diff = now.getTime() - startTime.getTime()
+        val diffSeconds = diff / 1000 % 60
+        val diffMinutes = diff / (60 * 1000) % 60
+        val diffHours = diff / (60 * 60 * 1000) % 24
+        val diffDays = diff / (24 * 60 * 60 * 1000)
+        ///val totalTime = "$diffDays days, $diffHours hrs, $diffMinutes mins, $diffSeconds secs"
+        var totalTime = "time: $diffHours:$diffMinutes:$diffSeconds"
+        if (diffDays <= 0) {
+            totalTime = "$diffHours:$diffMinutes:$diffSeconds"
+        } else {
+            totalTime = "$diffDays days $diffHours:$diffMinutes:$diffSeconds"
+        }
+        Log.d("owntracker", "totalTime: "+totalTime)
+        return totalTime
+    }
+
 
     fun readLog(): String {
         val sdcard = Environment.getExternalStorageDirectory()
@@ -240,9 +269,10 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
                 edit.apply()
                 startbutton.text = "Start"
                 endtime = getTime()
-                val timer = findViewById<View>(R.id.timer) as Chronometer
-                val getTimer = timer.text
-                val timestring = "$starttime to $endtime = $getTimer\n"
+                timer = findViewById<View>(R.id.timer) as Chronometer
+                getTimer = timer.text.toString()
+                val recordtime = countTime(starttime)
+                val timestring = "$starttime to $endtime = $recordtime ($getTimer)\n"
                 Log.i("owntracker", timestring)
                 writeLog(timestring)
             } else {
@@ -274,9 +304,10 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
                 edit.putBoolean("running", false)
                 edit.apply()
                 endtime = getTime()
-                val timer = findViewById<View>(R.id.timer) as Chronometer
-                val getTimer = timer.text
-                val timestring = "$starttime to $endtime = $getTimer\n"
+                timer = findViewById<View>(R.id.timer) as Chronometer
+                getTimer = timer.text.toString()
+                val recordtime = countTime(starttime)
+                val timestring = "$starttime to $endtime = $recordtime ($getTimer)\n"
                 Log.i("owntracker", timestring)
                 writeLog(timestring)
             }
@@ -341,9 +372,12 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
     override fun onPause() {
         super.onPause()
         Log.i("owntracker", "onPause() running: $running")
+
         preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         edit = preferences.edit()
         timer = findViewById<View>(R.id.timer) as Chronometer
+        getTimer = timer.text.toString()
+
         startbutton = findViewById<View>(R.id.sleepservice) as Button
         if (running) { startbutton.text = "Stop" } else { startbutton.text = "Start" }
         if (running) {
@@ -353,13 +387,14 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
             edit.apply()
             startbutton.text = "Stop"
         }
+
     }
 
 
     override fun onResume() {
         super.onResume()
         Log.i("owntracker", "onResume() running: $running")
-        val timer = findViewById<View>(R.id.timer) as Chronometer
+        timer = findViewById<View>(R.id.timer) as Chronometer
         if (running) {
             stoppedtime = timer.getBase() - SystemClock.elapsedRealtime()
         } else {
@@ -392,12 +427,12 @@ class MainActivity : AppCompatActivity()/*, SensorEventListener*/ {
 
     val runnable: Runnable = object : Runnable {
         override fun run() {
-            val timer = findViewById<View>(R.id.timer) as Chronometer
-            val getTimer = timer.text
+            timer = findViewById<View>(R.id.timer) as Chronometer
+            getTimer = timer.text.toString()
             Log.i("owntracker", "timer: $getTimer running: $running")
             preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
             edit = preferences.edit()
-            edit.putString("time", getTimer.toString())
+            edit.putString("time", getTimer)
             edit.apply()
             handler.postDelayed(this, 1000)
         }
